@@ -12,7 +12,8 @@ function IndexPage() {
   const createSence = () => {
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0xbfe3dd);
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+    camera.position.set(0, 0, -5);
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -23,7 +24,7 @@ function IndexPage() {
     document.body.appendChild(renderer.domElement);
 
     controls = new OrbitControls(camera, renderer.domElement);
-    controls.target.set(1, 0, 0); // 围绕中心轴旋转
+    // controls.target.set(1, 0, 0); // 围绕中心轴旋转
     controls.enableDamping = true;
     renderer.render(scene, camera);
     window.addEventListener('resize', () => {
