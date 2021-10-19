@@ -1,0 +1,42 @@
+.btn {
+  background-color: #0099ff;
+  color: #fff;
+  width: 120px;
+  height: 45px;
+  line-height: 45px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  cursor: pointer;
+  display: block;
+  text-align: center;
+}
+.opeartion {
+  position: fixed;
+  top: 5px;
+  right: 5px;
+  .btn {
+    margin-bottom: 5px;
+  }
+}
+.position {
+  display: inline-block;
+}
+.process {
+  width: 40%;
+  height: 20px;
+  border: 1px solid;
+  position: fixed;
+  left: calc(50% - 20%);
+  top: calc(50% - 10px);
+  border-radius: 10px;
+  .bar {
+    display: inline-block;
+    border-radius: 10px;
+    background-color: #0099ff;
+    transition: width 0.4s;
+    width: 0;
+    position: absolute;
+    left: 0;
+    height: 100%;
+  }
+}

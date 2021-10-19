@@ -3,17 +3,25 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment';
-import { useEffect } from 'react';
+import { useState } from 'react';
+import './scss/index.scss';
 function IndexPage() {
-  let scene = null;
-  let renderer = null;
-  let camera = null;
-  let controls = null;
+  let [scene, renderer, camera, controls] = [null, null, null, null];
+
+  const [processBar, setProcessBar] = useState({
+    width: 0,
+    isShow: false,
+  });
+  const [controlsObject, setControls] = useState(null);
   const createSence = () => {
+    if (document.getElementsByTagName('canvas')[0]) {
+      document.body.removeChild(document.getElementsByTagName('canvas')[0]);
+    }
+
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0xbfe3dd);
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
-    camera.position.set(0, 0, -5);
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.5, 1000);
+    camera.position.set(0, 0, -10);
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -24,8 +32,8 @@ function IndexPage() {
     document.body.appendChild(renderer.domElement);
 
     controls = new OrbitControls(camera, renderer.domElement);
-    // controls.target.set(1, 0, 0); // 围绕中心轴旋转
     controls.enableDamping = true;
+    setControls(controls);
     renderer.render(scene, camera);
     window.addEventListener('resize', () => {
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -33,6 +41,9 @@ function IndexPage() {
   };
 
   const loadGlb = (path) => {
+    setProcessBar({
+      isShow: true,
+    });
     const loader = new GLTFLoader();
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath('/examples/js/libs/draco/');
@@ -40,11 +51,25 @@ function IndexPage() {
     loader.load(
       path,
       (gltf) => {
+        console.log(gltf);
+
         scene.add(gltf.scene);
         animate();
       },
-      function (xhr) {
-        console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
+      (xhr) => {
+        let width = (xhr.loaded / xhr.total) * 100;
+        setProcessBar({
+          width,
+          isShow: true,
+        });
+        if (width >= 100) {
+          setTimeout(() => {
+            setProcessBar({
+              width,
+              isShow: false,
+            });
+          }, 600);
+        }
       },
     );
   };
@@ -53,6 +78,7 @@ function IndexPage() {
    * @param { Event } e
    */
   const onChangeFile = (e) => {
+    createSence();
     const glb = window.URL.createObjectURL(e.target.files[0]);
     loadGlb(glb);
   };
@@ -60,17 +86,34 @@ function IndexPage() {
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
   };
-  useEffect(() => {
-    setTimeout(() => {
-      createSence();
-    }, 1000);
-  });
+  const onRePosition = () => {
+    if (controlsObject) {
+      controlsObject.reset();
+    }
+  };
 
   return (
     <div>
-      <input type="file" name="file" id="file" onChange={onChangeFile.bind(this)} />
+      {processBar.isShow ? (
+        <div className="process">
+          <span className="bar" style={{ width: processBar.width + '%' }}></span>
+        </div>
+      ) : null}
+      <div className="opeartion">
+        <label className="btn open" htmlFor="file">
+          打开模型
+        </label>
+        <input
+          type="file"
+          hidden
+          name="file"
+          id="file"
+          accept=".glb,.gltf"
+          onChange={onChangeFile.bind(this)}
+        />
+        <div className="btn position" onClick={onRePosition}>复位</div>
+      </div>
     </div>
   );
 }
-
 export default IndexPage;
